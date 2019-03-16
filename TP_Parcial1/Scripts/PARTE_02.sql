@@ -21,14 +21,15 @@ modify descripcion_mod varchar2(100)
 
 ---7---
 UPDATE AHO_CUENTA_AHORRO
-SET SALDO_DISPONIBLE=(
+SET SALDO_DISPONIBLE= (
 	(SELECT SUM(A.IMPORTE)
 	FROM AHO_MOVIMIENTOS_CUENTA A
 	JOIN AHO_TIPO_MOVIMIENTO B
 	ON A.ID_TIPO = B.ID_TIPO
 	JOIN AHO_CUENTA_AHORRO C
 	ON A.ID_CUENTA = C.ID_CUENTA
-	WHERE B.DEBITO_CREDITO='C')
+	WHERE B.DEBITO_CREDITO='C'
+	GROUP BY A.ID_CUENTA)
  -
 	(SELECT SUM(A.IMPORTE+C.SALDO_BLOQUEADO)
 	FROM AHO_MOVIMIENTOS_CUENTA A
@@ -36,9 +37,37 @@ SET SALDO_DISPONIBLE=(
 	ON A.ID_TIPO = B.ID_TIPO
 	JOIN AHO_CUENTA_AHORRO C
 	ON A.ID_CUENTA = C.ID_CUENTA
-	WHERE B.DEBITO_CREDITO='D')	
+	WHERE B.DEBITO_CREDITO='D'
+	GROUP BY A.ID_CUENTA)	
 );
+/*
+posible parte 7
+CREATE OR REPLACE VIEW importe_credito_cuentas AS
+SELECT CA.id_cuenta id_cuenta, sum(NVL(MC.importe,0)) importe
+FROM
+	AHO_MOVIMIENTOS_CUENTA MC
+	INNER JOIN AHO_TIPO_MOVIMIENTO TM ON MC.ID_TIPO = TM.ID_TIPO
+	INNER JOIN AHO_CUENTA_AHORRO CA ON MC.id_cuenta = CA.id_cuenta
+WHERE DEBITO_CREDITO = 'C'
+GROUP BY CA.id_cuenta;
 
+CREATE OR REPLACE VIEW importe_debito_cuentas AS
+SELECT CA.id_cuenta id_cuenta, sum(NVL(MC.importe,0)+NVL(CA.SALDO_BLOQUEADO,0)) importe
+FROM
+	AHO_MOVIMIENTOS_CUENTA MC
+	INNER JOIN AHO_TIPO_MOVIMIENTO TM ON MC.ID_TIPO = TM.ID_TIPO
+	INNER JOIN AHO_CUENTA_AHORRO CA ON MC.id_cuenta = CA.id_cuenta
+WHERE DEBITO_CREDITO = 'D'
+GROUP BY CA.id_cuenta;
+
+CREATE OR REPLACE VIEW importe_total AS
+SELECT sum(imc.importe-idc.importe) importe, imc.id_cuenta
+FROM
+	importe_credito_cuentas imc
+	JOIN importe_debito_cuentas idc ON idc.id_cuenta = imc.id_cuenta
+GROUP BY imc.id_cuenta;
+
+*/
 column nombre format a20;
 column apellido format a20;
 column firma format a20;
