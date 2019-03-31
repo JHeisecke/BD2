@@ -1,3 +1,5 @@
+column "Nombre y Apelllido" format A25;
+SET LINESIZE 200;
 /*7
 Para tener una idea de movimientos, se desea conocer el volumen (cantidad) de ventas por mes 
 que se hicieron por cada artículo durante el año 2011. 
@@ -77,12 +79,17 @@ NOT EXISTS (SELECT CODIGO_CTA FROM B_DIARIO_DETALLE BDD WHERE C.CODIGO_CTA=BDD.C
 
 /*15
 El Dpto. De RRHH requiere un reporte que liste los siguientes datos de los empleados:
-Cedula. Nombre y Apellido (Concatenados). Antigüedad (Expresada en años). Cantidad de cargos ocupados en los primeros cinco años de permanencia en la empresa. 
+Cedula. Nombre y Apellido (Concatenados). Antigüedad (Expresada en años). 
+Cantidad de cargos ocupados en los primeros cinco años de permanencia en la empresa. 
 Promedio salarial de los cargos ocupados en los primeros cinco años de permanencia en la empresa.
 */
+
 SELECT BE.CEDULA,BE.NOMBRE||' '||BE.APELLIDO AS "Nombre y Apellido",(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM FECHA_ING)) AS "Antiguedad",
-COUNT(BE.FECHA_INI)
+COUNT(BP.FECHA_INI)
 FROM B_EMPLEADOS BE
+JOIN B_POSICION_ACTUAL BP
+ON BP.CEDULA=BE.CEDULA
+GROUP BY BE.CEDULA, BE.NOMBRE||' '||BE.APELLIDO,(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM FECHA_ING));
 
 
 
