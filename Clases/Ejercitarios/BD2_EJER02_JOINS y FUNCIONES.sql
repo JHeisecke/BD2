@@ -34,9 +34,13 @@ ID_Asiento, Fecha, Concepto, Nro.Linea, código cuenta, nombre cuenta, Monto dé
 (haga aparecer el monto del crédito o débito según el valor del campo débito_crédito – D ó C)
 */
 SELECT *
-FROM B_DIARIO_CABECERA BDC
-WHERE EXTRACT(YEAR FROM BDC.FECHA) = '2012' 
-AND EXTRACT(MONTH FROM BDC.FECHA) = '02';
+FROM B_DIARIO_DETALLE A
+JOIN B_DIARIO_CABECER B 
+ON B.ID=A.ID
+JOIN B_CUENTAS C 
+ON C.CODIGO_CTA = A.CODIGO_CTA
+WHERE EXTRACT(YEAR FROM A.FECHA) = '2012' 
+AND EXTRACT(MONTH FROM A.FECHA) = '02';
 
 
 
